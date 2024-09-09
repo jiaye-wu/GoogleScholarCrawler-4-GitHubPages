@@ -7,6 +7,7 @@ A Google Scholar Crawler for GitHub Pages decoupled from [AcadHomepage](https://
 This crawler is decoupled from [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io) and it works well with [Academic Pages](https://github.com/academicpages/academicpages.github.io).
 
 To try to implement it on your website:
+
     1. keep the folder structure and paste the files into your website root folder;
     2. in **project settings** > **Actions** > **General** > **Workflow permissions**, grant **Read and write permissions**;
     3. in **project settings** > Secret and variables > Actions > Repository Secrets > creat a key name ```GOOGLE_SCHOLAR_ID``` with value being *the string after your Google Scholar profile url* ```user=```;
