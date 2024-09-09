@@ -2,9 +2,18 @@
 
 A Google Scholar Crawler for GitHub Pages decoupled from [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io), a jekyll theme with **added features** of *i10-index* and *h-index* caching.
 
-## Implementation
+## Info about the crawler
 
-This crawler is decoupled from [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io) and it works well with [Academic Pages](https://github.com/academicpages/academicpages.github.io).
+This crawler is decoupled from [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io) and it works well with [Academic Pages](https://github.com/academicpages/academicpages.github.io) (personally tested).
+
+My modifications to the original version are adding the cached data for *i10-index* and *h-index* individually so that one can easily cite the data without digging through ```gs_data.json```.
+
+The benefits of the crawler include:
+
+1. **cached data**: avoid querying Google Scholar too frequently to encounter HTTP error code 429 "too many requests" which slows down local website building and stops GitHub Pages auto-deployment.
+2. **optimized access**: use CDN to have better GS data access in special Internet enviroment like in China.
+
+## Implementation
 
 To try to implement it on your website:
 
