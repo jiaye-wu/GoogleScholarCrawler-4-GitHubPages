@@ -8,5 +8,6 @@
 
 # Basic Site Settings
 locale                   : "en-US"
+name                     : &name "Jiaye Wu"
 google_scholar_stats_use_cdn : True
 
