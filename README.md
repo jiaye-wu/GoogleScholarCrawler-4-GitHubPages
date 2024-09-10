@@ -18,10 +18,11 @@ The benefits of the crawler include:
 To try to implement it on your website:
 
 1. keep the folder structure and paste the files into your website root folder;
-2. in **project settings** > **Actions** > **General** > **Workflow permissions**, grant **Read and write permissions**;
-3. in **project settings** > **Secret and variables** > **Actions** > **Repository Secrets** > creat a key name ```GOOGLE_SCHOLAR_ID``` with value being *the string after your Google Scholar profile url* ```user=```;
-4. the crawler will create a **branch** in the website project named ```google-scholar-stats``` with 4 json files: ```gs_data.json``` (full data for all your papers), ```gs_data_hindex.json```, ```gs_data_i10.json```, and ```gs_data_shieldsio.json```. 
-5. If the crawler fails to do so, you can manually create a **branch** name ```google-scholar-stats``` from ```master```. The content in **this branch** will be permanantly cleared when the crawler is working.
+2. setup ```_config.yml```: copy the lines in this project and change the contents to be yours;
+3. in **project settings** > **Actions** > **General** > **Workflow permissions**, grant **Read and write permissions**;
+4. in **project settings** > **Secret and variables** > **Actions** > **Repository Secrets** > creat a key name ```GOOGLE_SCHOLAR_ID``` with value being *the string after your Google Scholar profile url* ```user=```;
+5. the crawler will create a **branch** in the website project named ```google-scholar-stats``` with 4 json files: ```gs_data.json``` (full data for all your papers), ```gs_data_hindex.json```, ```gs_data_i10.json```, and ```gs_data_shieldsio.json```. 
+6. If the crawler fails to do so, you can manually create a **branch** name ```google-scholar-stats``` from ```master```. The content in **this branch** will be permanantly cleared when the crawler is working.
 
 ## Display your Google Scholar Citation Badge
 
