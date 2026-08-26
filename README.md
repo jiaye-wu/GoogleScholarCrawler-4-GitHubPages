@@ -1,207 +1,176 @@
-# GH-ScholarBot: Google Scholar Crawler for GitHub Pages
+# GH-ScholarBot
 
-A Google Scholar Crawler for GitHub Pages decoupled from [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io) jekyll theme, with **added features** of *i10-index* and *h-index* caching, and **improved usability**.
+GH-ScholarBot fetches a Google Scholar profile and publishes cached statistics to a dedicated Git branch. Your website or README can then read stable JSON files instead of querying Google Scholar during every build.
 
-## About the crawler
+This project began as a crawler extracted from the [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io) theme. It is now a standalone tool with local publishing, GitHub Actions automation, cached citation badges, h-index, i10-index, and publication-count support.
 
-This distribution of Google Scholar crawler is originally extracted from [AcadHomepage](https://github.com/RayeRen/acad-homepage.github.io) theme and now maintined by [me](https://github.com/jiaye-wu). It works well with [Academic Pages](https://github.com/academicpages/academicpages.github.io), [al-folio](https://github.com/alshedivat/al-folio), and [multi-language-al-folio](https://github.com/george-gca/multi-language-al-folio) (personally tested).
+## Badge preview
 
-My modifications to the original version are adding the cached data for *i10-index* and *h-index* individually so that one can easily cite the data without digging through `gs_data.json`.
+**Total citations:** <a href="https://scholar.google.com/citations?user=D2n8tswAAAAAJ"><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_total_citation.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations" alt="Google Scholar citations"></a>
 
-The benefits of this cawler version include:
+**Total publications:** <a href="https://scholar.google.com/citations?user=D2n8tswAAAAAJ"><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_total_publications.json&labelColor=f6f6f6&color=9cf&style=flat&label=publications" alt="Google Scholar publications"></a>
 
-1. **cached data**: avoid querying Google Scholar too frequently to encounter HTTP error code 429 "too many requests" which slows down local website building and stops GitHub Pages auto-deployment.
-2. **optimized access**: use CDN (in `_config.yml` set `google_scholar_stats_use_cdn` to `true`) to have better GS data access to in special Internet enviroments with censorship and delay. CDN also avoids `domain blocked` error from GitHub.com when there are too many refreshes. 
-3. **easy deployment**: fork, fill in your info, and play.
+**h-index:** <a href="https://scholar.google.com/citations?user=D2n8tswAAAAAJ"><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_h_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=h-index" alt="Google Scholar h-index"></a>
 
-## Appearance preview
+**i10-index:** <a href="https://scholar.google.com/citations?user=D2n8tswAAAAAJ"><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_i10_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=i10-index" alt="Google Scholar i10-index"></a>
 
-**Total citation:** <a href='https://scholar.google.com/citations?user=D2n8tswAAAAAJ'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_total_citation.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations"></a>
+## What it publishes
 
-**Total publications:** <a href='https://scholar.google.com/citations?user=D2n8tswAAAAAJ'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_total_publications.json&labelColor=f6f6f6&color=9cf&style=flat&label=publications"></a>
+Every successful update replaces the contents of the `google-scholar-stats` branch with these files:
 
-**h-index:** <a href='https://scholar.google.com/citations?user=D2n8tswAAAAAJ'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_h_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=h-index"></a>
+| File | Purpose |
+| --- | --- |
+| `gs_data.json` | Full Google Scholar author and publication data. |
+| `gs_data_total_citation.json` | Shield.io endpoint for total citations. |
+| `gs_data_h_index.json` | Shield.io endpoint for h-index. |
+| `gs_data_i10_index.json` | Shield.io endpoint for i10-index. |
+| `gs_data_total_publications.json` | Shield.io endpoint for publication count. |
 
-**i10-index:** <a href='https://scholar.google.com/citations?user=D2n8tswAAAAAJ'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fjiaye-wu%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_i10_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=i10-index"></a>
+The JSON filenames and badge schemas are stable. Existing badge URLs continue to work.
 
-## Auto-fetch
+## Quick start: local update
 
-Your Google Scholar data is automatically fetched at UTC 2:42 every Sunday.
+Local updates are the recommended path when Google blocks GitHub-hosted runners but permits requests from your own network.
 
-**Note:** Google may block crawler requests, even when free proxies are used. A successful update once a week is generally sufficient for personal use. The scheduled [free-proxy workflow](https://github.com/jiaye-wu/GH-ScholarBot/blob/main/.github/workflows/google_scholar_crawler_with_proxy.yaml) runs at UTC 02:42 every Sunday; its direct-access fallback runs whenever the proxy attempt fails, including manually triggered runs. Either workflow can also be run manually from the Actions page.
+Prerequisites:
 
-### Fetch workflows
+- Python 3.10 or newer
+- Git
+- An authenticated `origin` remote with permission to push to the repository
 
-The free-proxy workflow is the scheduled primary path. The direct-access workflow is its automatic fallback and can also be run manually. The proxy-test workflow is manual-only and checks proxy availability without changing published data.
+From the repository root, run the following.
 
-On GitHub Actions, each direct-access Scholar attempt runs in an isolated process with an 8-minute hard limit and is retried up to three times. Data-fetch workflows also have a 45-minute crawler limit, so a blocked request fails visibly instead of consuming the full GitHub Actions job limit.
+Windows PowerShell:
 
-**The most recent fetch with free proxy:** [![Get Citation Data (with free proxy)](https://github.com/jiaye-wu/GH-ScholarBot/actions/workflows/google_scholar_crawler_with_proxy.yaml/badge.svg)](https://github.com/jiaye-wu/GH-ScholarBot/actions/workflows/google_scholar_crawler_with_proxy.yaml)
-
-**The most recent fetch without proxy:** [![Get Citation Data (without free proxy)](https://github.com/jiaye-wu/GH-ScholarBot/actions/workflows/google_scholar_crawler_no_proxy.yaml/badge.svg)](https://github.com/jiaye-wu/GH-ScholarBot/actions/workflows/google_scholar_crawler_no_proxy.yaml)
-
-**Test free proxy only:** [![Test Free Proxy](https://github.com/jiaye-wu/GH-ScholarBot/actions/workflows/google_scholar_crawler_proxy_only.yaml/badge.svg)](https://github.com/jiaye-wu/GH-ScholarBot/actions/workflows/google_scholar_crawler_proxy_only.yaml)
-
-## Implementation
-
-### Configuration in `config.yml`
-
-- `repository: "<your-github-user-name>/<repo-name>"`: change `<your-github-user-name>` to your GitHub user name. `<repo-name>` is your GitHub Pages website repo if you choose **Option 1** below; `GH-ScholarBot` if you choose **Option 2**.
-
-- `google_scholar_stats_use_cdn: true` : true: use CDN, delay might occur. false: use GitHub.com.
-
-### Option 1: installation inside website repo (integration)
-
-You can **merge** this repo with (inside) your GitHub Pages website:
-
-1. download this repo, keep the folder structure and paste the files into your website root folder;
-2. setup `_config.yml`: copy the lines in this project and change the contents to be yours;
-3. in **project settings** > **Actions** > **General** > **Workflow permissions**, grant **Read and write permissions**;
-4. in **project settings** > **Secret and variables** > **Actions** > **Repository Secrets** > creat a key name `GOOGLE_SCHOLAR_ID` with value being *the string after your Google Scholar profile url* `user=`;
-5. the crawler will create a **branch** in the **website** project named `google-scholar-stats` with 5 json files: `gs_data.json` (full data for all your papers), `gs_data_h_index.json`, `gs_data_i10_index.json`, `gs_data_total_citation.json`, and `gs_data_total_publications.json`. 
-6. If the crawler fails to do so, you can manually create a **branch** name `google-scholar-stats` from `main`. The content in this `google-scholar-stats` branch will be permanantly cleared and replaced by the `json` files when the crawler is working.
-   
-   
-
-To use it **in your `.md` file** for your website pages:
-
-**To change in the following codes:** `<your-github-user-name>` and `GOOGLE_SCHOLAR_ID`
-
-#### For **Google Scholar citation badge**
-
-Use CDN for GitHub (delays in data-refresh might exist):
-
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_total_citation.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations"></a>
+```powershell
+cd google_scholar_crawler
+python -m pip install -r requirements.txt
+python main.py --author-id YOUR_GOOGLE_SCHOLAR_ID
+python publish_results.py
 ```
 
-Use GitHub.com:
+macOS/Linux:
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fgithub.com%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_total_citation.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations"></a>
-```
-
-#### For **Google Scholar publication badge**
-
-Use CDN for GitHub (delays in data-refresh might exist):
-
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_total_publications.json&labelColor=f6f6f6&color=9cf&style=flat&label=publications"></a>
+```bash
+cd google_scholar_crawler
+python3 -m pip install -r requirements.txt
+python3 main.py --author-id YOUR_GOOGLE_SCHOLAR_ID
+python3 publish_results.py
 ```
 
-Use GitHub.com:
+`YOUR_GOOGLE_SCHOLAR_ID` is the value after `user=` in your public Google Scholar profile URL. You may instead set `GOOGLE_SCHOLAR_ID`; `--author-id` takes precedence.
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fgithub.com%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_total_publications.json&labelColor=f6f6f6&color=9cf&style=flat&label=publications"></a>
-```
+The crawler writes results to `google_scholar_crawler/results/`. That directory is ignored by Git. `publish_results.py` reads the repository's current `origin` URL, creates a temporary Git repository, and publishes only the five result files. It never checks out another branch or changes your current worktree.
 
-#### For **Google Scholar h-index badge**
+### Safe publication rules
 
-Use CDN for GitHub (delays in data-refresh might exist):
+Before pushing, the publisher validates all five JSON files and compares four metrics with the remote `google-scholar-stats` branch:
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_h_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=h-index"></a>
-```
+- citations
+- h-index
+- i10-index
+- total publications
 
-Use GitHub.com:
+The default rule accepts a publish only when every local metric is at least as high as its remote value and at least one metric is higher. This helps prevent an incomplete or blocked fetch from replacing good cached data.
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fgithub.com%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_h_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=h-index"></a>
-```
+If Google Scholar has corrected data downward, or you deliberately need to publish unchanged data, review the displayed comparison and run:
 
-#### For **Google Scholar i10-index badge**
-
-Use CDN for GitHub (delays in data-refresh might exist):
-
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_i10index.json&labelColor=f6f6f6&color=9cf&style=flat&label=i10-index"></a>
+```bash
+python publish_results.py --force
 ```
 
-Use GitHub.com:
+`--force` bypasses the freshness warning only. JSON validation remains mandatory, and the final push uses a Git lease so a concurrent update is not overwritten silently.
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fgithub.com%2F<your-github-user-name>%2F<your-github-user-name>.github.io@google-scholar-stats%2Fgs_data_i10index.json&labelColor=f6f6f6&color=9cf&style=flat&label=i10-index"></a>
-```
+Useful publisher options:
 
-### Option 2: Standalone installation
-
-You can **fork** this repo into your own GitHub account, for example `github.com/<your-github-user-name>/GH-ScholarBot/`
-
-1. setup `_config.yml`: change the contents to be yours;
-2. in **project settings** > **Actions** > **General** > **Workflow permissions**, grant **Read and write permissions**;
-3. in **project settings** > **Secret and variables** > **Actions** > **Repository Secrets** > creat a key name `GOOGLE_SCHOLAR_ID` with value being *the string after your Google Scholar profile url* `user=`;
-4. the crawler will create a **branch** in the **crawler** project named `google-scholar-stats` with 4 json files: `gs_data.json` (full data for all your papers), `gs_data_h_index.json`, `gs_data_i10_index.json`, and `gs_data_total_citation.json`. 
-5. If the crawler fails to do so, you can manually create a **branch** name `google-scholar-stats` from `main`. The content in this `google-scholar-stats` branch will be permanantly cleared and replaced by the `json` files when the crawler is working.
-   
-   
-
-To use it **in your `.md` file** for your website pages:
-
-**To change in the following codes:** `<your-github-user-name>` and `GOOGLE_SCHOLAR_ID`
-
-**Note:** the codes below is different from **Option 1**. It uses data under `github.com/<your-github-user-name>/GH-ScholarBot/` other than `github.com/<your-github-user-name>/<your-github-user-name>.github.io/`.
-
-#### For **Google Scholar citation badge**
-
-Use CDN for GitHub (delays in data-refresh might exist):
-
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<your-github-user-name>%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_total_citation.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations"></a>
+```bash
+python publish_results.py --help
+python publish_results.py --remote upstream
+python publish_results.py --branch my-stats-branch
+python publish_results.py --results-dir path/to/results
 ```
 
-Use GitHub.com:
+## GitHub Actions automation
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fgithub.com%2F<your-github-user-name>%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_total_citation.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations"></a>
-```
+Automation remains available as a supplementary update path. Configure the `GOOGLE_SCHOLAR_ID` repository secret before running it.
 
-#### For **Google Scholar h-index badge**
+| Workflow | Trigger | Behavior |
+| --- | --- | --- |
+| **Get Citation Data (with free proxy)** | Every Sunday at 02:42 UTC, or manually | Primary automatic update using a free proxy. |
+| **Get Citation Data (without free proxy fallback)** | Manually, or after the proxy workflow fails | Direct-access fallback. |
+| **Test Free Proxy** | Manually only | Tests free-proxy availability without writing JSON or publishing data. |
 
-Use CDN for GitHub (delays in data-refresh might exist):
+The crawler has bounded request retries and process timeouts so blocked requests fail visibly instead of consuming the entire GitHub Actions job limit. A successful Actions run and a successful local publish update the same `google-scholar-stats` branch.
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<your-github-user-name>%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_h_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=h-index"></a>
-```
+## Use the cached data on a website
 
-Use GitHub.com:
+Set the following in your Jekyll `_config.yml`:
 
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fgithub.com%2F<your-github-user-name>%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_h_index.json&labelColor=f6f6f6&color=9cf&style=flat&label=h-index"></a>
-```
-
-#### For **Google Scholar i10-index badge**
-
-Use CDN for GitHub (delays in data-refresh might exist):
-
-```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<your-github-user-name>%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_i10index.json&labelColor=f6f6f6&color=9cf&style=flat&label=i10-index"></a>
+```yaml
+repository: "<github-user>/<repository>"
+google_scholar_stats_use_cdn: true
 ```
 
-Use GitHub.com:
+Set `google_scholar_stats_use_cdn` to `false` to read directly from GitHub instead of jsDelivr. CDN propagation can take time after an update.
 
+Use a Shield.io endpoint badge in Markdown or HTML. Replace `<github-user>`, `<repository>`, and `YOUR_GOOGLE_SCHOLAR_ID`:
+
+```html
+<a href="https://scholar.google.com/citations?user=YOUR_GOOGLE_SCHOLAR_ID">
+  <img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2F<github-user>%2F<repository>@google-scholar-stats%2Fgs_data_total_citation.json&labelColor=f6f6f6&color=9cf&style=flat&label=citations" alt="Google Scholar citations">
+</a>
 ```
-<a href='https://scholar.google.com/citations?user=GOOGLE_SCHOLAR_ID'><img src="https://img.shields.io/endpoint?logo=Google%20Scholar&url=https%3A%2F%2Fgithub.com%2F<your-github-user-name>%2FGH-ScholarBot@google-scholar-stats%2Fgs_data_i10index.json&labelColor=f6f6f6&color=9cf&style=flat&label=i10-index"></a>
+
+Replace `gs_data_total_citation.json` with one of the other badge JSON filenames to display h-index, i10-index, or publication count. If you do not use jsDelivr, replace the encoded `https://cdn.jsdelivr.net/gh/` URL with the corresponding `https://github.com/` URL.
+
+## Deployment choices
+
+### Standalone repository
+
+Fork this repository, set `_config.yml` to your fork, configure the `GOOGLE_SCHOLAR_ID` secret only if you want Actions automation, and use the branch files from that fork in your website badges.
+
+### Integrated into a website repository
+
+Copy the crawler directory, workflows, `.gitignore` rule, and relevant `_config.yml` settings into your website repository. Set `repository` to that website repository. Both local publishing and Actions then update its `google-scholar-stats` branch.
+
+For Actions publishing, enable **Settings → Actions → General → Workflow permissions → Read and write permissions** in the target repository.
+
+## Manual Git publishing
+
+`publish_results.py` is preferred because it validates JSON and checks metric freshness. For an advanced manual alternative, create a temporary directory outside your working repository, copy only the five files from `google_scholar_crawler/results/`, and run:
+
+```bash
+git init
+git config user.name "GH-ScholarBot local publisher"
+git config user.email "noreply@users.noreply.github.com"
+git add gs_data.json gs_data_total_citation.json gs_data_h_index.json gs_data_i10_index.json gs_data_total_publications.json
+git commit -m "Updated Citation Data"
+git remote add origin YOUR_REPOSITORY_REMOTE_URL
+git push origin HEAD:google-scholar-stats --force
 ```
 
-## All your other citation data for each paper
+This intentionally replaces the stats branch contents. It does not include the freshness protection provided by `publish_results.py`.
 
-Available in `gs_data.json`. You can be creative and do whatever you want with it!
+## Troubleshooting
 
-## Google blocking the autofetch?
+### GitHub Actions cannot fetch Scholar data
 
-The crawler first tries a free proxy. If no working free proxy is available, the proxy workflow fails and its direct-access fallback workflow runs automatically. This avoids mixing a failed proxy configuration with direct access in the same process. If both runs fail, the current GitHub runner may be temporarily blocked by Google. Here are some solutions to try:
+Google Scholar frequently blocks cloud-runner IP ranges and free proxies may be unavailable. Try a local update first. You can also run **Test Free Proxy** to distinguish proxy availability from general Scholar blocking.
 
-1. A direct but non-free solution is to subscribe to a paid proxy. Please refer to [scholarly-python-package](https://github.com/scholarly-python-package/scholarly?tab=readme-ov-file#examples).
+### The publisher refuses to push
 
-2. It looks like the scheduled workflow runner of GitHub is more prone to being detected and blocked by Google, and manually rerunning a failed job (several times until it succeeds) has a greater success rate (it seems that the manual jobs are on a different runner; I might be wrong, but it does work). Usually, you don't need to run this repo so frequently. For me, once a week should be sufficient.
+Read the metric comparison. Equal or lower values require `--force`; malformed, missing, or schema-invalid JSON files cannot be published. Ensure that `git push` to `origin` works with your local credentials.
 
-3. To update data or manually rerun a failed update, run the [free-proxy workflow](https://github.com/jiaye-wu/GH-ScholarBot/blob/main/.github/workflows/google_scholar_crawler_with_proxy.yaml). It automatically uses the direct-access [fallback workflow](https://github.com/jiaye-wu/GH-ScholarBot/blob/main/.github/workflows/google_scholar_crawler_no_proxy.yaml) after any proxy failure. To test only whether a free proxy is available, run [Test Free Proxy](https://github.com/jiaye-wu/GH-ScholarBot/blob/main/.github/workflows/google_scholar_crawler_proxy_only.yaml); it does not write data or trigger the fallback workflow.
+### Local crawl is blocked or times out
 
-4. For automatic update (workflow), please take a look at [workflow file](https://github.com/jiaye-wu/GH-ScholarBot/blob/main/.github/workflows/) and play with 
-   
-   ```yaml
-   schedule:
-   - cron:  '42 2 * * 0'
-   ```
-   
-   with a different frequency and time. I don't know the optimal combination yet.
+Retry later, try a different network, or consider a paid proxy. Use `python main.py --use-free-proxy --author-id YOUR_GOOGLE_SCHOLAR_ID` only when you explicitly want the free-proxy mode.
+
+## Development
+
+Run the offline publisher test suite after installing crawler dependencies:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.

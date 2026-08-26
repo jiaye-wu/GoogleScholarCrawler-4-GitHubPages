@@ -26,10 +26,10 @@ def now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def get_author_id() -> str:
-    author_id = os.environ.get("GOOGLE_SCHOLAR_ID")
+def get_author_id(cli_author_id: str | None = None) -> str:
+    author_id = cli_author_id or os.environ.get("GOOGLE_SCHOLAR_ID")
     if not author_id:
-        raise RuntimeError("GOOGLE_SCHOLAR_ID is not configured.")
+        raise RuntimeError("Set GOOGLE_SCHOLAR_ID or pass --author-id.")
     return author_id
 
 
@@ -95,22 +95,41 @@ def fetch_author_once(author_id: str, initial_author=None):
 
 
 def fetch_author_in_subprocess(author_id: str):
-    """Fetch directly in an isolated Linux process with a reliable hard limit."""
+    """Fetch directly in an isolated process with a reliable hard limit."""
     with tempfile.TemporaryDirectory() as temporary_directory:
         output_path = Path(temporary_directory) / "author.json"
         command = [
             sys.executable,
             "-u",
             str(Path(__file__).resolve()),
+            "--author-id",
+            author_id,
             "--fetch-once-output",
             str(output_path),
         ]
-        process = subprocess.Popen(command, start_new_session=True)
+        popen_options = {}
+        if os.name == "posix":
+            popen_options["start_new_session"] = True
+        elif os.name == "nt":
+            popen_options["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+        process = subprocess.Popen(command, **popen_options)
         try:
             return_code = process.wait(timeout=ATTEMPT_TIMEOUT_SECONDS)
         except subprocess.TimeoutExpired as exc:
-            os.killpg(process.pid, signal.SIGKILL)
-            process.wait()
+            if os.name == "posix":
+                os.killpg(process.pid, signal.SIGKILL)
+            else:
+                subprocess.run(
+                    ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                    check=False,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
             raise TimeoutError(
                 f"Scholar attempt exceeded {ATTEMPT_TIMEOUT_SECONDS} seconds."
             ) from exc
@@ -125,7 +144,7 @@ def fetch_author(author_id: str, initial_author=None):
     for attempt in range(MAX_ATTEMPTS):
         try:
             print(f"Fetching author (attempt {attempt + 1}/{MAX_ATTEMPTS}): {now()}")
-            if author is None and os.name == "posix":
+            if author is None:
                 author = fetch_author_in_subprocess(author_id)
             else:
                 with attempt_timeout(ATTEMPT_TIMEOUT_SECONDS):
@@ -193,6 +212,10 @@ def main() -> None:
         help="Require a tested free proxy; exit non-zero when none is available.",
     )
     parser.add_argument(
+        "--author-id",
+        help="Google Scholar author ID; overrides GOOGLE_SCHOLAR_ID.",
+    )
+    parser.add_argument(
         "--test-free-proxy",
         action="store_true",
         help="Test a free proxy without writing result files.",
@@ -205,7 +228,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.test_free_proxy and not args.use_free_proxy:
         parser.error("--test-free-proxy requires --use-free-proxy.")
-    author_id = get_author_id()
+    author_id = get_author_id(args.author_id)
     configure_scholarly()
 
     if args.fetch_once_output:

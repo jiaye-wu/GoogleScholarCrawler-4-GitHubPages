@@ -2,6 +2,23 @@
 
 All notable changes to this project are documented in this file.
 
+## [7.0] - 2026-08-26
+
+### Major changes
+
+- Added a supported local update workflow: run the crawler locally and publish the generated results with `publish_results.py` without switching the current Git branch.
+- Added `--author-id` to `main.py`; it overrides `GOOGLE_SCHOLAR_ID` and simplifies local execution.
+- Added cross-platform isolated-process timeouts for direct Scholar requests on Windows and Linux.
+- Added validation and freshness protection before local publication. By default, citations, h-index, i10-index, and publication count must all be non-decreasing, with at least one increased value.
+- Added `publish_results.py --force` for intentional replacements after Google Scholar data corrections or unchanged refreshes.
+- Added a real `.gitignore` rule for local crawler output and comprehensive offline tests for the local publisher.
+- Fixed UTF-8 decoding of remote JSON on Windows systems that use a non-UTF-8 console code page.
+
+### Compatibility
+
+- Existing JSON filenames, badge schemas, badge URLs, and GitHub Actions workflows are unchanged.
+- Local and GitHub Actions updates both publish the same five JSON files to `google-scholar-stats`.
+
 ## [6.0] - 2026-08-13
 
 ### Major changes
